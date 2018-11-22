@@ -14,7 +14,7 @@ static void sighandler(int signo)
     printf("good beye!\n");
 }
 
-const int map[15][10] = {
+int map[15][10] = {
 	{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
 	{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
 	{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
@@ -202,9 +202,9 @@ int main()
 			block.rotation = block.rotation % 4;
 		}
 
-        bool collsion = false;
 
         //方块碰墙检测
+        bool collsion = false;
         for ( int i = 0; i < 4; i++ ){
             for ( int j = 0; j < 4; j++ ){
                 //砖块内部坐标，从上往下，最左往右扫描
@@ -226,6 +226,40 @@ int main()
             if (collsion)
                 break;
         }
+
+        //方块触底检测
+        bool touch_bottom = false;
+        for ( int i = 0; i < 4; i++ ){
+            for ( int j = 0; j < 4; j++ ){
+                //砖块内部坐标，从下往上，最左往右扫描
+                //坐标转换到map
+                int maprow = (block.row + 1) - i;
+                int mapcol = block.col + j;
+                if (1 == cur_block[block.rotation][3 - i][j]
+                        && 1 == map[maprow][mapcol]){
+                    touch_bottom = true;
+                    break;
+                }
+            }
+            if (touch_bottom)
+                break;
+        }
+
+        //固化方块数据到map
+        if (touch_bottom){
+            for ( int i = 0; i < 4; i++ ){
+                for ( int j = 0; j < 4; j++ ){
+                    int maprow = block.row  - i;
+                    int mapcol = block.col + j;
+                    if (1 == cur_block[block.rotation][3 - i][j]) {
+                        map[maprow][mapcol] = 1;
+                    }
+                }
+            }
+            touch_bottom = false;
+            block.row = 3;
+        }
+
 
 		for (int i = 0; i < 15; i++)
 		{
